@@ -13,7 +13,7 @@ The upstream prompt references Claude.ai web tools that do not exist in Claude C
 | `write_file` (and its `asset:` param) | `Write` — drop the "asset review pane" concept entirely |
 | `copy_files` | `Bash cp` |
 | `read_file`, `list_files`, `view_image` | `Read` (it renders images too), `Glob` / `Bash ls`, `Grep` |
-| `show_to_user` | `SendUserFile` / `open <path>` |
+| `show_to_user` | `SendUserFile` (or `open <path>` for a self-contained file); for final deliverables also surface a screenshot and give the served `http://localhost:<port>/...` URL so the user can open and interact with the live result — Claude Code has no user-visible agent browser, so delivery is file + screenshot + URL (see "Showing files & preview") |
 | `eval_js`, `eval_js_user_view`, `run_script` | `Bash`; the Claude Preview MCP `preview_eval` for in-page JS |
 | `web_fetch`, `web_search` | `WebFetch`, `WebSearch` |
 | `copy_starter_component` | `Bash cp starter-components/<file> designs/<project>/` (or `Read` + adapt) |
@@ -31,6 +31,8 @@ Replaces `questions_v2`. `AskUserQuestion` **returns the user's answers inline**
 
 To surface a deliverable, use `SendUserFile` with the file path (works for any file type — HTML, images, text). Reading a file does NOT show it to the user.
 
+**For final design/prototype deliverables, treat the preview as part of delivery, not only private validation.** Claude Code has no shared, user-visible browser to flip on (the Claude Preview MCP is agent-driven), so make the result visible by handing it off: `SendUserFile` the deliverable, surface a final `preview_screenshot` (it renders inline in the transcript), and give the user the served `http://localhost:<port>/<project>/<file>.html` URL so they can open and interact with the live prototype in their own browser. Do this after verification, unless the user asked you not to.
+
 To open a prototype in a browser — whether for the user to interact with or for you to preview/screenshot it — **always serve it over HTTP and load the `http://localhost:<port>/<project>/<file>.html` URL; do not open the HTML directly from `file://`.** A multi-file prototype (an HTML entry that loads `<script type="text/babel" src="…jsx">` components) only works over HTTP — the browser blocks cross-origin local script reads — and self-contained single files go through the same served URL so preview and screenshots stay consistent.
 
 Serve the whole `designs/` directory once (one server for all projects) and reuse it. Preview through the Claude Preview MCP, which serves from a named config in `.claude/launch.json`: define a single `designs` server that serves the whole `designs/` directory (`python3 -m http.server 4311 --directory designs`) so every project shares one server.
@@ -45,6 +47,7 @@ Preview through the Claude Preview MCP:
 2. Open `http://localhost:<port>/<project>/<file>.html`.
 3. `mcp__Claude_Preview__preview_console_logs` to catch JS errors.
 4. `mcp__Claude_Preview__preview_screenshot` to inspect layout. Fix any errors and surface it again.
+5. When the deliverable is ready, hand off the result: `SendUserFile` the file, surface the final `preview_screenshot`, and give the user the served URL so they can open and interact with it directly.
 
 For thorough or directed checks ("screenshot and check the spacing"), spawn an `Agent` subagent to load the file, take screenshots, probe the JS, and report back — useful when you don't want to clutter your own context.
 

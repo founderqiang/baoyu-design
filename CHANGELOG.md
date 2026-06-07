@@ -10,6 +10,8 @@ All notable changes to `baoyu-design` are tracked in this file.
 
 ### Changed
 
+- Clarified that final design and prototype delivery should include the running preview, not only the generated file.
+- Updated Claude Code, Codex Agent, and Cursor harness references to make final preview handoff visible to the user after verification.
 - Updated the English and Simplified Chinese README files to document Codex Agent support, the new `references/codex.md` harness map, install examples, usage notes, and changelog links.
 
 ## 2026-06-06

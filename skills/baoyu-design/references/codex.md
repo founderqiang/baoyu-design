@@ -11,7 +11,7 @@ The harness-specific tools `system-prompt.md` relies on, for when you are runnin
 | `write_file` (and its `asset:` param) | Codex's normal file editing tools. There is no asset review pane; drop that concept. |
 | `copy_files` | Shell `cp`. |
 | `read_file`, `list_files`, `view_image` | Codex's normal file read/search tools; use the image viewing tool only for local visual inspection. |
-| `show_to_user` | Provide the absolute local file path and the served `http://localhost:<port>/...` URL; embed screenshots/images with Markdown using absolute paths. |
+| `show_to_user` | Provide the absolute local file path and the served `http://localhost:<port>/...` URL; for final design deliverables, make the Codex in-app browser visible on that URL; embed screenshots/images with Markdown using absolute paths when useful. |
 | `eval_js`, `eval_js_user_view`, `run_script` | Shell for scripts; Codex Browser plugin / in-app browser Playwright API for in-page JS and DOM probes. |
 | `web_fetch`, `web_search` | Codex web tools if present; use them only for time-sensitive facts or user-requested web lookup. |
 | `copy_starter_component` | Shell `cp starter-components/<file> designs/<project>/` (or read and adapt). |
@@ -30,6 +30,7 @@ To surface a deliverable to the user:
 
 - Give the absolute local file path in the final response.
 - Give the served local URL, usually `http://localhost:4311/<project>/<file>.html`.
+- For final design/prototype deliverables, open the served URL in the Codex in-app browser and make that browser visible to the user after verification, unless the user explicitly asked not to. Treat the final preview as part of delivery, not only private validation.
 - For screenshots or generated images, embed with Markdown using an absolute local path: `![alt](/absolute/path.png)`.
 
 Always serve the prototype over HTTP and load the served URL. Do not open HTML prototypes directly from `file://`; multi-file React/Babel prototypes will silently fail to load their `.jsx` dependencies.
@@ -54,6 +55,7 @@ Typical Codex Browser flow:
 4. Inspect the rendered page with the Browser plugin's documented DOM/screenshot APIs.
 5. Check console/runtime errors with the Browser plugin's documented Playwright or page-evaluation APIs.
 6. Fix errors, reload the page, and repeat until the page loads cleanly.
+7. When the deliverable is ready, present the in-app browser with `await (await browser.capabilities.get("visibility")).set(true)` so the user can see and interact with the result directly.
 
 Use screenshots when visual layout matters. Save screenshots under the project's `designs/<project>/` folder or a temp path, then embed the absolute screenshot path if the user should see it.
 

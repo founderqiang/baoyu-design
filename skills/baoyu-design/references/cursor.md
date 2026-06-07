@@ -13,7 +13,7 @@ The upstream prompt (and its examples) reference Claude.ai web tools that do not
 | `write_file` (and its `asset:` param) | `Write` — there is no "asset review pane"; drop that concept |
 | `copy_files` | `Shell` (`cp …`) |
 | `read_file`, `list_files`, `view_image` | `Read` (it also renders images), `Glob` (find by pattern), `Grep` (search contents), `Shell ls` |
-| `show_to_user` | embed screenshots inline in your reply (`![alt](path)`) and/or open the local preview URL in the browser MCP — see "Showing files & preview" below. There is no `SendUserFile`. |
+| `show_to_user` | embed screenshots inline in your reply (`![alt](path)`) and/or open the local preview URL in the browser MCP; for final design deliverables, make the browser visible to the user on that URL (`browser_navigate` with `position: "active"`) — see "Showing files & preview" below. There is no `SendUserFile`. |
 | `eval_js`, `eval_js_user_view`, `run_script` | `Shell` for scripts; `browser_cdp` (`Runtime.evaluate`) or chrome-devtools `evaluate_script` for in-page JS — see "Verification & debug" below |
 | `web_fetch`, `web_search` | `WebFetch`, `WebSearch` |
 | `copy_starter_component` | `Shell cp starter-components/<file> designs/<project>/` (or `Read` + adapt) |
@@ -60,6 +60,7 @@ There is no `SendUserFile` in Cursor. To surface a deliverable to the user:
 
 - **Screenshots / images:** embed them inline in your reply with `![alt](path)` (absolute local path or an http URL). The chat renders them automatically.
 - **A live prototype:** open it in the browser MCP so the user (and you) can interact with it.
+- **Final design/prototype deliverables:** after verifying the served URL, open it with the browser made visible to the user (`browser_navigate` with `position: "active"`, or `position: "side"` for side-by-side) so they can see and interact with the result directly, unless the user explicitly asked not to. Treat the final preview as part of delivery, not only private validation.
 
 **Always serve the prototype over HTTP and load its `http://localhost:<port>/<project>/<file>.html` URL — never open the HTML directly from `file://`.** A multi-file prototype (an HTML entry that loads `<script type="text/babel" src="…jsx">` components) only works over HTTP — the browser blocks cross-origin local script reads — and self-contained single files go through the same served URL so preview and screenshots stay consistent.
 
@@ -74,6 +75,7 @@ Run it with the `Shell` tool and `block_until_ms: 0` so it backgrounds; reuse th
 1. `browser_navigate` → `http://localhost:4311/<project>/<file>.html` (omit `position` so focus stays in the chat).
 2. `browser_snapshot` for the accessibility tree / structure, or `browser_take_screenshot` for a visual the user can see — embed the screenshot path inline in your reply.
 3. `browser_click` / `browser_type` / `browser_press_key` / `browser_scroll` to interact.
+4. When the deliverable is ready, re-navigate with `position: "active"` (or `"side"`) so the browser becomes visible and the user can see and interact with the result directly.
 
 ## Verification & debug
 

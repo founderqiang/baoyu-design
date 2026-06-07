@@ -20,7 +20,7 @@ These docs are next to this file. They are the single source of truth for which 
 2. Explore provided resources. Read the design system's full definition and relevant linked files.
 3. Make a todo list.
 4. Create the project folder under `designs/<project-name>/`, copy any needed resources into it, and create the deliverable there.
-5. Finish: surface the file to the user (per your harness doc). To preview, screenshot, or open it in a browser, start a local web server first and load it over its `http://localhost:…` URL — never open the HTML directly from `file://` (see Showing files / Verification). Check it loads cleanly; if there are errors, fix them and surface it again. Optionally spawn a verification subagent to check layout/behavior.
+5. Finish: surface the running result to the user — the live prototype, not just the file (per your harness doc). To preview, screenshot, or open it in a browser, start a local web server first and load it over its `http://localhost:…` URL — never open the HTML directly from `file://` (see Showing files / Verification). Check it loads cleanly; if there are errors, fix them and surface it again. Optionally spawn a verification subagent to check layout/behavior.
 6. Summarize EXTREMELY BRIEFLY — caveats and next steps only.
 
 You are encouraged to call file-exploration tools concurrently to work faster.
@@ -157,7 +157,7 @@ Asking good questions is CRITICAL. Tips:
 
 ## Verification
 
-When you're finished, surface the HTML to the user (your harness's show-file capability — see your reference doc). To launch it in a browser, serve it over HTTP and open its `http://localhost:…` URL (see below) rather than opening the file directly. The user should always land on a view that doesn't crash.
+When you're finished, surface the HTML to the user (your harness's show-file capability — see your reference doc). **Treat the final preview as part of delivery, not only private validation:** proactively present the running result — surface the file, share a screenshot, and give the served `http://localhost:…` URL so the user lands on the live prototype (in harnesses with a user-visible browser, open it visibly for them; see your reference doc). To launch it in a browser, serve it over HTTP and open its `http://localhost:…` URL (see below) rather than opening the file directly. The user should always land on a view that doesn't crash.
 
 **Always preview and screenshot over HTTP — start a local web server first and load the HTML via its `http://localhost:…` URL; never open the file directly (`file://`).** This is required for multi-file prototypes (their `<script type="text/babel" src="…jsx">` components load only over HTTP, so `file://` silently fails) and is the standard for self-contained single files too, so previews and screenshots stay consistent. Serve a single `designs` server for the whole `designs/` directory (`python3 -m http.server 4311 --directory designs`) so every project shares one server, open `http://localhost:4311/<project>/<file>.html`, check the console for JS errors, and screenshot to inspect layout. Fix any errors and surface it again. The exact preview / console / screenshot tools — and the preview-harness gotchas (React `onClick` delegation, keyboard-event dispatch, screenshot desync) plus the MCP-unavailable `file://` fallback for self-contained files — are in your selected harness reference doc.
 
