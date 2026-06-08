@@ -1,19 +1,19 @@
 ---
 name: "use-design-system"
-description: "Consume an existing design system from a regular design project — discover available systems, import a compiled copy into _ds/<slug>/, wire it up, seed a starting point, and record the binding in meta.json."
+description: "Consume an existing design system from a regular design project — discover available systems, import a compiled copy into _ds/<slug>/, wire it up, seed a starting point, and record the binding in _d_meta.json."
 ---
 # Using a design system in a project
 
 Use this guide when you're building a **regular design project** (a mockup, prototype, deck, app screens — anything that is *not itself* a design system) and want it to follow one or more existing design systems. It is the consumer-side companion to [`design-system-authoring-guide.md`](design-system-authoring-guide.md) (which covers the other direction — *authoring* the system you import here).
 
-The mechanism mirrors the authoring pipeline: instead of scattering copied assets, you sync a **self-contained, version-pinned copy** of each design system into `<project>/_ds/<slug>/` with a script, wire it into your HTML, and record the binding in `<project>/meta.json`. Re-running the script later is how you pull updates.
+The mechanism mirrors the authoring pipeline: instead of scattering copied assets, you sync a **self-contained, version-pinned copy** of each design system into `<project>/_ds/<slug>/` with a script, wire it into your HTML, and record the binding in `<project>/_d_meta.json`. Re-running the script later is how you pull updates.
 
 ## How projects and design systems are distinguished on disk
 
-Everything lives flat under `designs/`. The two kinds are told apart by a marker file, not by folder name:
+Everything lives flat under `designs/`. The two kinds are told apart by a root marker file, not by folder name:
 
-- **A design system** has `_ds_manifest.json` at its **root** — `designs/<ds>/_ds_manifest.json` (the compiler writes it there). It is self-describing; it does **not** carry a `meta.json`.
-- **A regular project** has `meta.json` at its root, plus — for each system it consumes — a `designs/<project>/_ds/<slug>/` folder whose own `_ds_manifest.json` sits **one level deeper**.
+- **A design system** has `_ds_manifest.json` at its **root** — `designs/<ds>/_ds_manifest.json` (the compiler writes it there). It is self-describing; it does **not** carry a `_d_meta.json`.
+- **A regular project** has `_d_meta.json` at its **root**, plus — for each system it consumes — a `designs/<project>/_ds/<slug>/` folder whose own `_ds_manifest.json` sits **one level deeper**. (The `_d_` prefix — matching the `_ds_` marker convention — keeps our metadata from colliding with any `meta.json` the deliverable itself ships at the project root.)
 
 So `glob designs/*/_ds_manifest.json` matches **only authored design systems**, never a consumed copy (those live at `designs/*/_ds/*/_ds_manifest.json`). This holds even when a project consumes several systems.
 
@@ -37,7 +37,7 @@ Before building, confirm with your harness's Ask-Question tool (Claude Code: `As
 2. **Which design system(s)** — list what discovery found, **multiSelect** so the user can pick **none** (free design), **one**, or **several**. With several selected, the **first selection** is the primary by default; confirm if they want a different primary.
 3. **(Optional) A starting point** — if a chosen system exposes `startingPoints[]`, offer them as seeds; otherwise offer its `cards[]` as reference or let the user design from scratch.
 
-If the user picks no design system, skip the rest of this flow (steps 3–7) and design normally — no `_ds/` folder, `designSystems: []`, `primaryDesignSystem: null`. You **still** get a `meta.json`: `record-asset.mjs` creates it (with `type`/`createdAt`/`updatedAt`) the first time you record a deliverable as an asset — see ["Recording deliverables as assets"](#recording-deliverables-as-assets) below.
+If the user picks no design system, skip the rest of this flow (steps 3–7) and design normally — no `_ds/` folder, `designSystems: []`, `primaryDesignSystem: null`. You **still** get a `_d_meta.json`: `record-asset.mjs` creates it (with `type`/`createdAt`/`updatedAt`) the first time you record a deliverable as an asset — see ["Recording deliverables as assets"](#recording-deliverables-as-assets) below.
 
 ### 3. Import each selected design system
 
@@ -56,7 +56,7 @@ The script reuses the read-only parser, so the copy set is exact and determinist
 - `_ds_bundle.js`, `_ds_manifest.json`, `_adherence.oxlintrc.json`, `README.md`;
 - the DS's `assets/` directory, if present.
 
-It writes **only** `_ds/<slug>/` and `meta.json` — never the DS source, and it does not transpile (that stays with `compile-design-system.mjs`). It then prints the namespace, the exact `<link>`/`<script>` wiring lines, any starting points, and warnings (e.g. a missing bundle means the DS was never compiled — compile it first, then re-import).
+It writes **only** `_ds/<slug>/` and `_d_meta.json` — never the DS source, and it does not transpile (that stays with `compile-design-system.mjs`). It then prints the namespace, the exact `<link>`/`<script>` wiring lines, any starting points, and warnings (e.g. a missing bundle means the DS was never compiled — compile it first, then re-import).
 
 ### 4. Wire it into your page
 
@@ -80,11 +80,11 @@ If the user chose a starting point, seed it from the DS copy (the script doesn't
 - **Screen** — copy `<dsDir>/<startingPoint.path>` to the **project root** as the seed page, then rewrite its `<script src=…_ds_bundle.js>` → `_ds/<slug>/_ds_bundle.js` and its `<link href=…styles.css>` → `_ds/<slug>/styles.css`. The body's `window.<Namespace>.*` references are already portable.
 - **Component** — don't copy a file; render `<Name>` directly from `window.<Namespace>` (the bundle must be loaded). The source at `<dsDir>/<startingPoint.path>` is there if you want to read it for reference.
 
-Record the choice in `meta.json.startingPoint` (with `dsSlug` so it's clear which system it came from).
+Record the choice in the `startingPoint` field of `_d_meta.json` (with `dsSlug` so it's clear which system it came from).
 
-### 6. Record the binding in meta.json
+### 6. Record the binding in _d_meta.json
 
-The script writes/merges `<project>/meta.json` for you. Shape:
+The script writes/merges `<project>/_d_meta.json` for you. Shape:
 
 ```json
 {
@@ -131,7 +131,7 @@ node <skill>/agents/check-design-system.mjs <projectDir>/_ds/<slug>
 
 ## Recording deliverables as assets
 
-`meta.json` also indexes the project's **deliverables** — the HTML pages and `.dc.html` components you'd actually show the user — under `assets` (shape in step 6 above). This is **independent of design systems**: every project has deliverables, so it applies even to a project that imported no system. Don't hand-edit `assets`; the `record-asset.mjs` helper maintains it — and it **bootstraps `meta.json` itself** when the project has none yet (the no-design-system case):
+`_d_meta.json` also indexes the project's **deliverables** — the HTML pages and `.dc.html` components you'd actually show the user — under `assets` (shape in step 6 above). This is **independent of design systems**: every project has deliverables, so it applies even to a project that imported no system. Don't hand-edit `assets`; the `record-asset.mjs` helper maintains it — and it **bootstraps `_d_meta.json` itself** when the project has none yet (the no-design-system case):
 
 ```
 node <skill>/agents/record-asset.mjs <projectDir> <htmlPath> [flags]
@@ -155,11 +155,11 @@ node <skill>/agents/record-asset.mjs <projectDir> <htmlPath> [flags]
 node <skill>/agents/record-asset.mjs <projectDir> --remove [<htmlPath>] [--name "<n>"] [--path <relPath>]
 ```
 
-A path removes that one version (scoped to `--name` if also given); `--name` alone removes the whole asset. An asset whose last version is removed is deleted, and `assets` is dropped entirely once empty. Running `--remove` against a missing `meta.json` is a no-op — it won't create an empty file.
+A path removes that one version (scoped to `--name` if also given); `--name` alone removes the whole asset. An asset whose last version is removed is deleted, and `assets` is dropped entirely once empty. Running `--remove` against a missing `_d_meta.json` is a no-op — it won't create an empty file.
 
 ## Updating a project later
 
-Read `meta.json` to recover which systems the project uses, then:
+Read `_d_meta.json` to recover which systems the project uses, then:
 
 - **Refresh a system** — re-run the import script for that `<dsDir>`. It overwrites `_ds/<slug>/` in place and updates only that entry in `designSystems[]` (idempotent: no duplicates, other entries and `createdAt`/`title`/`prompt` untouched).
 - **Add a system** — run the script for the new `<dsDir>`; it appends to `designSystems[]`. Add `--primary` if it should become primary.

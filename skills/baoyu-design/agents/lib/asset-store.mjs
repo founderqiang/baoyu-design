@@ -1,4 +1,4 @@
-// asset-store.mjs — the asset half of a project's meta.json. A pure, dependency-
+// asset-store.mjs — the asset half of a project's _d_meta.json. A pure, dependency-
 // free port of the reference app-hub reducer so the importer/recorder scripts and
 // any host share one model for a project's recorded UI deliverables ("assets").
 //
@@ -34,6 +34,12 @@ function nowIso() {
 }
 
 const STATUS_VALUES = ['needs-review', 'approved', 'changes-requested'];
+
+// Where a project's metadata lives: <projectDir>/_d_meta.json. The _d_ prefix
+// (matching the _ds_manifest.json marker convention) namespaces our file at the
+// project root so it never collides with a deliverable's own meta.json.
+const META_FILE = '_d_meta.json';
+const metaPathFor = (projectDir) => path.join(projectDir, META_FILE);
 
 // Derive a display name from a deliverable path: basename minus .dc.html, then
 // minus .html. "Welcome.html" → "Welcome", "Card.dc.html" → "Card".
@@ -122,7 +128,7 @@ function unrecordAssetVersion(meta, action) {
   if (Object.keys(meta.assets).length === 0) delete meta.assets;
 }
 
-// Read <projectDir>/meta.json. Missing file → {} (fresh project). A file that
+// Read <projectDir>/_d_meta.json. Missing file → {} (fresh project). A file that
 // exists but is invalid JSON throws — better than silently clobbering the
 // orchestrator-written fields (title/prompt/designSystems/…) on the next write.
 function readMeta(metaPath) {
@@ -136,7 +142,7 @@ function readMeta(metaPath) {
   try {
     parsed = JSON.parse(raw);
   } catch (e) {
-    throw new Error(`existing meta.json is not valid JSON (${metaPath}): ${(e && e.message) || e}`);
+    throw new Error(`existing _d_meta.json is not valid JSON (${metaPath}): ${(e && e.message) || e}`);
   }
   return isRecord(parsed) ? parsed : {};
 }
@@ -150,7 +156,7 @@ function bootstrapMeta(meta) {
   return meta;
 }
 
-// Persist meta.json: set createdAt once, bump updatedAt, pretty-print + newline
+// Persist _d_meta.json: set createdAt once, bump updatedAt, pretty-print + newline
 // (identical to import-design-system.mjs).
 function writeMeta(metaPath, meta) {
   const iso = nowIso();
@@ -162,6 +168,8 @@ function writeMeta(metaPath, meta) {
 
 export {
   STATUS_VALUES,
+  META_FILE,
+  metaPathFor,
   isRecord,
   getAssetBaseName,
   findAssetNameByPath,

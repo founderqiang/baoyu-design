@@ -4,19 +4,20 @@
 // holds _ds_manifest.json at its root) and a regular design project
 // (<projectDir>), it copies the design system's runtime subset into
 // <projectDir>/_ds/<dsSlug>/ as a self-contained, version-pinned copy, then
-// records the binding in <projectDir>/meta.json.
+// records the binding in <projectDir>/_d_meta.json.
 //
 // Usage: node import-design-system.mjs <dsDir> <projectDir> [--primary]
 //
 // It reuses the read-only parser (ds-core.mjs) to resolve the exact copy set
 // (the global-CSS @import closure + every local url() asset those files
 // reference). It writes ONLY under <projectDir>/_ds/<dsSlug>/ and
-// <projectDir>/meta.json — it never touches the DS source and never transpiles
+// <projectDir>/_d_meta.json — it never touches the DS source and never transpiles
 // (compile-design-system.mjs owns transpilation).
 
 import fs from 'node:fs';
 import path from 'node:path';
 import { buildModel } from './lib/ds-core.mjs';
+import { metaPathFor, readMeta, bootstrapMeta, writeMeta } from './lib/asset-store.mjs';
 
 // --- args ---------------------------------------------------------------------
 const argv = process.argv.slice(2);
@@ -148,16 +149,16 @@ function skillName(skillRel) {
 const titleCase = (s) => s.replace(/[-_]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 const dsName = firstH1('README.md') || skillName('SKILL.md') || titleCase(dsSlug);
 
-// --- merge meta.json ----------------------------------------------------------
-const metaPath = path.join(projectDir, 'meta.json');
-let meta = {};
+// --- merge _d_meta.json --------------------------------------------------
+const metaPath = metaPathFor(projectDir);
+let meta;
 try {
-  const parsed = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
-  if (parsed && typeof parsed === 'object') meta = parsed;
-} catch { /* fresh */ }
-
-if (!meta.type) meta.type = 'design';
-if (!Array.isArray(meta.designSystems)) meta.designSystems = [];
+  meta = readMeta(metaPath);
+} catch (e) {
+  process.stderr.write(`import-design-system: ${(e && e.message) || e}\n`);
+  process.exit(1);
+}
+bootstrapMeta(meta);
 
 const entry = {
   name: dsName,
@@ -173,12 +174,7 @@ else meta.designSystems.push(entry);
 // primary pointer: first import auto-claims it; --primary overrides
 if (makePrimary || !meta.primaryDesignSystem) meta.primaryDesignSystem = dsSlug;
 
-const nowIso = new Date().toISOString();
-if (!meta.createdAt) meta.createdAt = nowIso;
-meta.updatedAt = nowIso;
-
-fs.mkdirSync(projectDir, { recursive: true });
-fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2) + '\n');
+writeMeta(metaPath, meta);
 
 // --- report -------------------------------------------------------------------
 const entryCss = model.globalCssPaths.includes(model.globalCssEntry)
@@ -191,7 +187,7 @@ out.push(
   `${assetUrlCount} url() asset(s), ${assetDirCount} assets/ file(s), ` +
   `plus bundle/manifest/adherence/readme.`,
 );
-out.push(`meta.json: designSystems["${dsSlug}"] recorded; primaryDesignSystem = "${meta.primaryDesignSystem}".`);
+out.push(`_d_meta.json: designSystems["${dsSlug}"] recorded; primaryDesignSystem = "${meta.primaryDesignSystem}".`);
 out.push('');
 out.push('Wire it up in your page (load the PRIMARY design system\'s <link> LAST so its tokens win):');
 if (entryCss) out.push(`  <link rel="stylesheet" href="_ds/${dsSlug}/${entryCss}">`);

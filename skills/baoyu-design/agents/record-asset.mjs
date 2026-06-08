@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 // record-asset.mjs — record (or unrecord) a regular design project's UI
-// deliverables as "assets" in <projectDir>/meta.json. Run this after you create
-// or finish a deliverable (an HTML page or .dc.html component) so meta.json keeps
-// an index of the project's UI entry points, their versions, viewports, and review
-// status. It is independent of design systems: recording an asset also CREATES
-// meta.json for a project that has none yet (e.g. one that uses no design system).
+// deliverables as "assets" in <projectDir>/_d_meta.json. Run this after you
+// create or finish a deliverable (an HTML page or .dc.html component) so
+// _d_meta.json keeps an index of the project's UI entry points, their
+// versions, viewports, and review status. It is independent of design systems:
+// recording an asset also CREATES _d_meta.json for a project that has none
+// yet (e.g. one that uses no design system).
 //
 // Usage:
 //   record (default):
@@ -23,12 +24,13 @@
 // omitted in Claude Code (no chat-id surface) — it exists for app-hub parity.
 //
 // Shares the asset model with the importer/host via lib/asset-store.mjs (a port of
-// the reference reducer). Writes ONLY <projectDir>/meta.json. Exit 64 usage, 1 error.
+// the reference reducer). Writes ONLY <projectDir>/_d_meta.json. Exit 64 usage, 1 error.
 
 import fs from 'node:fs';
 import path from 'node:path';
 import {
   STATUS_VALUES,
+  metaPathFor,
   getAssetBaseName,
   findAssetNameByPath,
   recordAssetVersion,
@@ -73,8 +75,8 @@ function usage(msg) {
 const projectDirArg = positional[0];
 if (!projectDirArg) usage('missing <projectDir>');
 const projectDir = path.resolve(projectDirArg);
-const metaPath = path.join(projectDir, 'meta.json');
-const relMeta = toPosix(path.relative(process.cwd(), metaPath)) || 'meta.json';
+const metaPath = metaPathFor(projectDir);
+const relMeta = toPosix(path.relative(process.cwd(), metaPath)) || '_d_meta.json';
 
 // --- path helpers -------------------------------------------------------------
 function toPosix(p) { return p.split(path.sep).join('/'); }
