@@ -631,6 +631,16 @@
       };
       window.addEventListener('beforeprint', this._onBeforePrint);
       window.addEventListener('afterprint', this._onAfterPrint);
+      // Native browser fullscreen (F11 / element.requestFullscreen) hides the
+      // rail the same way host-driven presenting does. Independent flag so it
+      // doesn't clobber _presenting when both paths are in play.
+      this._onFsChange = () => {
+        this._fullscreen = !!document.fullscreenElement;
+        this._syncRailHidden();
+        this._fit();
+        this._scaleThumbs();
+      };
+      document.addEventListener('fullscreenchange', this._onFsChange);
       // Initial collection + layout happens via slotchange, which fires on mount.
       this._enableRail();
       // Hold the stage hidden until webfonts are ready so the first visible
@@ -840,6 +850,7 @@
       window.removeEventListener('click', this._onDocClick, true);
       window.removeEventListener('beforeprint', this._onBeforePrint);
       window.removeEventListener('afterprint', this._onAfterPrint);
+      if (this._onFsChange) document.removeEventListener('fullscreenchange', this._onFsChange);
       if (this._freezeStyle) { this._freezeStyle.remove(); this._freezeStyle = null; }
       this.removeEventListener('click', this._onTap);
       if (this._hideTimer) clearTimeout(this._hideTimer);
@@ -1216,7 +1227,7 @@
       // corrects it.
       if (!this._railEnabled || !this._railVisible || this.hasAttribute('no-rail')
           || this.hasAttribute('noscale') || this._presenting || this._previewMode
-          || NARROW_MQ.matches) return 0;
+          || this._fullscreen || NARROW_MQ.matches) return 0;
       return this._railPx || 0;
     }
 
@@ -1329,7 +1340,7 @@
       // transition. data-user-hidden is the soft hide (translateX(-100%))
       // for the viewer's rail toggle, so show/hide slides under
       // :host([data-rail-anim]).
-      const hard = !this._railEnabled || this._presenting || this._previewMode;
+      const hard = !this._railEnabled || this._presenting || this._previewMode || this._fullscreen;
       if (hard) this._rail.setAttribute('data-presenting', '');
       else this._rail.removeAttribute('data-presenting');
       if (!this._railVisible) this._rail.setAttribute('data-user-hidden', '');
