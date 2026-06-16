@@ -11,6 +11,7 @@ import {
   lineSpacingMultiple,
   letterSpacingPoints,
   noWrap,
+  normalizeText,
 } from "../core/css.ts";
 import { type RenderContext, rectToPptx } from "./context.ts";
 import { imageKey } from "./media-cache.ts";
@@ -34,7 +35,7 @@ export function renderNodeToPptx(node: SlideNode, ctx: RenderContext): void {
   // ---- text leaf ----
   if (node.tag === "#text") {
     const style = node.style;
-    const text = node.text ? normalize(node.text, style.whiteSpace) : "";
+    const text = node.text ? normalizeText(node.text, style.whiteSpace) : "";
     if (!text || node.rect.w < 0.5 || node.rect.h < 0.5 || style.visibility === "hidden") return;
     const coords = rectToPptx(node.rect, ctx);
     const fmt = textFormat(style, ctx.fontMap);
@@ -428,19 +429,6 @@ export function renderNodeToPptx(node: SlideNode, ctx: RenderContext): void {
   }
 
   for (const child of node.children) if (!consumed.has(child)) renderNodeToPptx(child, ctx);
-}
-
-function normalize(text: string, whiteSpace: string | null | undefined): string {
-  // local alias to keep the #text branch readable (delegates to core css)
-  return text && (whiteSpace === "pre" || whiteSpace === "pre-wrap")
-    ? text.replace(/^\n+|\n+$/g, "")
-    : whiteSpace === "pre-line"
-      ? text
-          .split("\n")
-          .map((l) => l.replace(/[ \t]+/g, " ").trim())
-          .join("\n")
-          .replace(/^\n+|\n+$/g, "")
-      : text.replace(/\s+/g, " ").trim();
 }
 
 function errMsg(err: unknown): string {
