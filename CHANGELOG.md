@@ -4,6 +4,12 @@ English | [中文](./CHANGELOG.zh.md)
 
 All notable changes to `baoyu-design` are tracked in this file.
 
+## 1.1.0 - 2026-06-22
+
+### Changed
+- `generate-images`: update raster image guidance for modern image backends that can render text reliably, including Chinese / CJK, and route text-heavy infographics to HTML/CSS only when editability, exactness, or data binding matters.
+- `make-a-deck`: align deck imagery guidance with text-capable image generation so generated slide infographics can include headings, labels, callouts, and Chinese copy when they do not need live editability or exact numeric binding.
+
 ## 1.0.0 - 2026-06-22
 
 ### Features
