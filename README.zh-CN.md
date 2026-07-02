@@ -228,8 +228,8 @@ python3 -m http.server 4311 --directory designs
 <div class="ball" data-anim="path" data-anim-path="C 100 -200 300 -200 400 0"></div>
 ```
 
-- **效果：** 入场/退场 —— `appear`/`disappear`（出现/消失）、`fade`（淡入/淡出）、`fly`（四方向飞入/飞出）、`wipe`（四方向擦除）、`float`（浮入/浮出）、`split`（劈裂）、`bounce`（弹跳）、`zoom`（缩放）、`wheel`（轮子）、`random-bars`（随机线条），均有 `-in`/`-out` 成对形式；强调 —— `spin`（陀螺旋）、`grow`/`shrink`（放大/缩小）、`pulse`（脉冲）、`teeter`（跷跷板）；以及 `path` —— 由直线段和三次贝塞尔曲线组成的自定义路径动画。
-- **时序：** `data-anim-trigger="click|with|after"` 与 PowerPoint 的「单击时 / 与上一动画同时 / 上一动画之后」一一对应（默认 `after`，所以只写一个 `data-anim="fade-in"` 就会在翻到该页时自动播放）；`data-anim-delay`、`data-anim-duration`、`data-anim-order` 用来微调时间线；`data-anim-repeat` 和 `data-anim-auto-reverse`（限强调/路径类）可以让旋转循环播放、让路径动画去而复返。
+- **效果：** 入场/退场 —— `appear`/`disappear`（出现/消失）、`fade`（淡入/淡出）、`fly`（四方向飞入/飞出）、`wipe`（四方向擦除）、`float`（浮入/浮出）、`split`（劈裂）、`bounce`（弹跳）、`zoom`（缩放）、`wheel`（轮子，扇形扫描）、`random-bars`（随机线条）、`blinds`（百叶窗）、`checkerboard`（棋盘）、`dissolve`（溶解）、`box`（盒状）、`circle`（圆形扩展）、`diamond`（菱形）、`plus`（十字形扩展）、`strips`（阶梯状，四角方向）、`wedge`（楔入），均有 `-in`/`-out` 成对形式；强调 —— `spin`（陀螺旋）、`grow`/`shrink`（放大/缩小）、`pulse`（脉冲）、`teeter`（跷跷板）；以及 `path` —— 由直线段和三次贝塞尔曲线组成的自定义路径动画。
+- **时序：** `data-anim-trigger="click|with|after"` 与 PowerPoint 的「单击时 / 与上一动画同时 / 上一动画之后」一一对应（默认 `after`，所以只写一个 `data-anim="fade-in"` 就会在翻到该页时自动播放）；`data-anim-delay`、`data-anim-duration`、`data-anim-order` 用来微调时间线；`data-anim-repeat` 和 `data-anim-auto-reverse`（限 `spin`/`grow`/`shrink`/`path`）可以让旋转循环播放、让路径动画去而复返。
 - **在浏览器里**，`deck-stage` 组件会实时播放构建动画 —— **→/空格键先逐步播放 click 门控的构建**，播完才翻页；往回翻则直接显示完整构建好的页面。打印、缩略图和 PDF 导出始终显示最终版式。
 - **导出可编辑 PPTX 时**，这些属性会被自动识别（无需任何配置），写成**原生 PowerPoint 动画** —— 打开动画窗格，每个构建都在里面，可以继续调顺序、改时长。截图模式导出的是平面图片，动画会被跳过。
 
