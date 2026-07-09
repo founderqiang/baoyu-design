@@ -151,6 +151,29 @@ npx skills add JimLiu/baoyu-design --list
 
 它会把技能装到 Claude Code 的 `.claude/skills/`，以及 Cursor/Codex 风格 Agent 的 `.agents/skills/`（加上 `-g` 则装到 `~/` 级别的用户目录）。
 
+### 更新
+
+如果你是通过 `skills` CLI 安装的 `baoyu-design`，可以在终端里更新：
+
+```bash
+# 更新并让 CLI 提示选择安装范围
+npx skills update baoyu-design
+
+# 更新当前项目级安装
+npx skills update baoyu-design -p -y
+
+# 更新全局安装
+npx skills update baoyu-design -g -y
+```
+
+`upgrade` 也可以作为别名使用：
+
+```bash
+npx skills upgrade baoyu-design
+```
+
+也可以直接运行 `npx skills update` 来更新所有已安装的技能。更新后，请重启 Claude Code（或开启一个新的 Agent 会话），让新的技能文件被重新加载。
+
 **备选方式 —— 直接把仓库 URL 发给 Agent。** 不想安装任何东西？把链接贴进对话，让 Agent 自己去拉取技能：
 
 > 阅读 https://github.com/JimLiu/baoyu-design 并按照其中的 `skills/baoyu-design/SKILL.md`，帮我设计一个冥想 App 的设置页面。

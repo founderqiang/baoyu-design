@@ -150,6 +150,29 @@ npx skills add JimLiu/baoyu-design --list
 
 It installs to `.claude/skills/` for Claude Code and `.agents/skills/` for Cursor/Codex-style agents (add `-g` for the `~/`‑level user install).
 
+### Update
+
+If you installed `baoyu-design` with the `skills` CLI, update it from the terminal:
+
+```bash
+# Update and let the CLI prompt for the install scope
+npx skills update baoyu-design
+
+# Update the project-level install
+npx skills update baoyu-design -p -y
+
+# Update the global install
+npx skills update baoyu-design -g -y
+```
+
+`upgrade` is also supported as an alias:
+
+```bash
+npx skills upgrade baoyu-design
+```
+
+You can also run `npx skills update` to update all installed skills. After updating, restart Claude Code (or start a new agent session) so the refreshed skill files are loaded.
+
 **Alternative — hand the repo URL to your agent.** Don't want to install anything? Paste the URL into chat and let the agent fetch the skill itself:
 
 > Read https://github.com/JimLiu/baoyu-design and follow its `skills/baoyu-design/SKILL.md` to design a settings screen for a meditation app.
